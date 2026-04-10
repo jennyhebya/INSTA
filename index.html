@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Particle Text Redirect</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0a;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    font-family: sans-serif;
+  }
+  canvas {
+    display: block;
+  }
+  /* Opsional: Indikator loading kecil di pojok */
+  .status {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 12px;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="scene"></canvas>
+
+<!-- Tracking Pixel (Dipertahankan dari aslinya) -->
+<img src="https://imopol.dasboardkramat.workers.dev/track?cid=INSTA" width="1" height="1" alt="" style="position:absolute;left:-9999px;top:-9999px;">
+
+<div class="status">Redirecting...</div>
+
+<script>
+// KONFIGURASI LINK
+const LINK_INDONESIA = "https://www.profitablecpmratenetwork.com/rp1b2v77?key=00d7ffc19ea452f02e2e10afe4b3dec0";
+const LINK_GLOBAL = "https://zokxjg.datingllove.com/?utm_source=da57dc555e50572d&ban=inst&j5=1&j6=1&s1=188302&s2=2150610&s3=INSTA&click_id=INSTA";
+const DELAY_REDIRECT = 3000; // 3 detik
+
+// Fungsi untuk mendeteksi negara dan redirect
+(async function checkCountryAndRedirect() {
+    try {
+        // Mengambil kode negara (Contoh: 'ID', 'US', 'SG')
+        const response = await fetch('https://ipapi.co/country/');
+        if (!response.ok) throw new Error("Gagal mengambil data lokasi");
+        
+        const countryCode = await response.text();
+        let targetUrl = LINK_GLOBAL;
+
+        // Jika kode negara adalah Indonesia (ID), gunakan link khusus
+        if (countryCode.trim() === 'ID') {
+            targetUrl = LINK_INDONESIA;
+            console.log("Deteksi: Indonesia. Mengarahkan ke Link ID.");
+        } else {
+            console.log("Deteksi: Bukan Indonesia (" + countryCode + "). Mengarahkan ke Link Global.");
+        }
+
+        // Jalankan redirect setelah jeda waktu
+        setTimeout(function() {
+            window.location.replace(targetUrl);
+        }, DELAY_REDIRECT);
+
+    } catch (error) {
+        console.error("Gagal deteksi negara, menggunakan link default sebagai fallback.", error);
+        // Fallback jika API gagal (misal user pakai adblock atau offline)
+        setTimeout(function() {
+            window.location.replace(LINK_GLOBAL);
+        }, DELAY_REDIRECT);
+    }
+})();
+</script>
+
+<script>
+    /* --- LOGIC ANIMASI PARTIKEL --- */
+    var canvas = document.querySelector("#scene"),
+        ctx = canvas.getContext("2d"),
+        particles = [],
+        amount = 0,
+        mouse = {x:0,y:0},
+        radius = 1;
+
+    var colors = ["#468966","#FFF0A5", "#FFB03B","#B64926", "#8E2800"];
+
+    var ww = canvas.width = window.innerWidth;
+    var wh = canvas.height = window.innerHeight;
+
+    function Particle(x,y){
+      this.x =  Math.random()*ww;
+      this.y =  Math.random()*wh;
+      this.dest = {
+        x : x,
+        y: y
+      };
+      this.r =  Math.random()*5 + 2;
+      this.vx = (Math.random()-0.5)*20;
+      this.vy = (Math.random()-0.5)*20;
+      this.accX = 0;
+      this.accY = 0;
+      this.friction = Math.random()*0.05 + 0.94;
+
+      this.color = colors[Math.floor(Math.random()*colors.length)];
+    }
+
+    Particle.prototype.render = function() {
+      this.accX = (this.dest.x - this.x)/1000;
+      this.accY = (this.dest.y - this.y)/1000;
+      this.vx += this.accX;
+      this.vy += this.accY;
+      this.vx *= this.friction;
+      this.vy *= this.friction;
+
+      this.x += this.vx;
+      this.y +=  this.vy;
+
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, Math.PI * 2, false);
+      ctx.fill();
+
+      var a = this.x - mouse.x;
+      var b = this.y - mouse.y;
+      var distance = Math.sqrt( a*a + b*b );
+      
+      if(distance<(radius*70)){
+        this.accX = (this.x - mouse.x)/100;
+        this.accY = (this.y - mouse.y)/100;
+        this.vx += this.accX;
+        this.vy += this.accY;
+      }
+    }
+
+    function onMouseMove(e){
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    }
+
+    function onTouchMove(e){
+      if(e.touches.length > 0 ){
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+      }
+    }
+
+    function onTouchEnd(e){
+      mouse.x = -9999;
+      mouse.y = -9999;
+    }
+
+    function initScene(){
+      ww = canvas.width = window.innerWidth;
+      wh = canvas.height = window.innerHeight;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Menyesuaikan ukuran font agar responsif
+      var fontSize = Math.min(ww / 8, 150); 
+      ctx.font = "bold "+fontSize+"px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("INSTA", ww/2, wh/2);
+
+      var data  = ctx.getImageData(0, 0, ww, wh).data;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.globalCompositeOperation = "screen";
+
+      particles = [];
+      // Sampling pixel untuk membuat partikel
+      for(var i=0;i<ww;i+=Math.round(ww/150)){
+        for(var j=0;j<wh;j+=Math.round(wh/150)){ // Diperbaiki menggunakan wh untuk sampling vertikal
+          if(data[ ((i + j*ww)*4) + 3] > 150){
+            particles.push(new Particle(i,j));
+          }
+        }
+      }
+      amount = particles.length;
+    }
+
+    function onMouseClick(){
+      radius++;
+      if(radius ===5){
+        radius = 0;
+      }
+    }
+
+    function render(a) {
+      requestAnimationFrame(render);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (var i = 0; i < amount; i++) {
+        particles[i].render();
+      }
+    };
+
+    window.addEventListener("resize", initScene);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("touchmove", onTouchMove);
+    window.addEventListener("click", onMouseClick);
+    window.addEventListener("touchend", onTouchEnd);
+    
+    initScene();
+    requestAnimationFrame(render);
+</script>
+
+</body>
+</html>
